@@ -21,6 +21,12 @@ class HomePage extends StatelessWidget {
         foregroundColor: Colors.grey,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person_add),
+            onPressed: () => _addContact(context),
+          ),
+        ],
       ),
       drawer: const myDrawer(),
       body: _buildUserList(),
@@ -29,7 +35,7 @@ class HomePage extends StatelessWidget {
 
   Widget _buildUserList() {
     return StreamBuilder(
-      stream: _chatService.getUsersStream(),
+      stream: _chatService.getContactsStream(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Text('Error');
@@ -37,6 +43,10 @@ class HomePage extends StatelessWidget {
 
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Text('Loading...');
+        }
+
+        if (snapshot.data == null || snapshot.data!.isEmpty) {
+          return const Text('No contacts found. Add some contacts to start chatting!');
         }
 
         return ListView(
@@ -47,6 +57,7 @@ class HomePage extends StatelessWidget {
       },
     );
   }
+
 
   Widget _buildUserListItem(
       Map<String, dynamic> userData, BuildContext context) {
@@ -69,4 +80,40 @@ class HomePage extends StatelessWidget {
       return Container();
     }
   }
+  void _addContact(BuildContext context) {
+    final TextEditingController emailController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Add Contact'),
+          content: TextField(
+            controller: emailController,
+            decoration: InputDecoration(labelText: 'Enter email'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final email = emailController.text.trim();
+
+                if (email.isNotEmpty) {
+                  // Fetch the user by email
+                  final userDoc = await _chatService.getUserByEmail(email);
+                  if (userDoc != null) {
+                    await _chatService.addContact(userDoc['uid'], email);
+                  }
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }
+

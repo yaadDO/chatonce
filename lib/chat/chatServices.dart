@@ -7,11 +7,17 @@ class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Stream<List<Map<String,dynamic>>> getUsersStream() {
-    return _firestore.collection('Users').snapshots().map((snapshot) {
+  Stream<List<Map<String, dynamic>>> getContactsStream() {
+    final String currentUserID = _auth.currentUser!.uid;
+
+    return _firestore
+        .collection('Users')
+        .doc(currentUserID)
+        .collection('contacts')
+        .snapshots()
+        .map((snapshot) {
       return snapshot.docs.map((doc) {
-        final user = doc.data();
-        return user;
+        return doc.data();
       }).toList();
     });
   }
@@ -51,5 +57,42 @@ class ChatService {
         .collection('messages')
         .orderBy('timestamp', descending: false)
         .snapshots();
+  }
+
+  Future<void> addContact(String contactID, String contactEmail) async {
+    final String currentUserID = _auth.currentUser!.uid;
+
+    await _firestore
+        .collection('Users')
+        .doc(currentUserID)
+        .collection('contacts')
+        .doc(contactID)
+        .set({
+      'uid': contactID,
+      'email': contactEmail,
+    });
+
+    // Optionally, add the current user to the contact's contacts list
+    await _firestore
+        .collection('Users')
+        .doc(contactID)
+        .collection('contacts')
+        .doc(currentUserID)
+        .set({
+      'uid': currentUserID,
+      'email': _auth.currentUser!.email,
+    });
+  }
+  Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+    final snapshot = await _firestore
+        .collection('Users')
+        .where('email', isEqualTo: email)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return snapshot.docs.first.data();
+    }
+
+    return null;
   }
 }
