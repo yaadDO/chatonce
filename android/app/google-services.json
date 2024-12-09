@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "150057979453",
+    "project_id": "chatonce-a2127",
+    "storage_bucket": "chatonce-a2127.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:150057979453:android:12d1716f7f770bb3f7a454",
+        "android_client_info": {
+          "package_name": "com.once.chatonce"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoOYfDlF_JLNE-LcGIowjQ0r24bKLT9MI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
