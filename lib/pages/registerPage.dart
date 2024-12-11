@@ -52,12 +52,12 @@ class registerPage extends StatelessWidget {
             Icon(
               Icons.message,
               size: 60,
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.inversePrimary,
             ),
             Text(
               'Create Account?',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.inversePrimary,
                 fontSize: 16,
               ),
             ),
@@ -99,7 +99,7 @@ class registerPage extends StatelessWidget {
                 Text(
                   'Already have an account?',
                   style:
-                  TextStyle(color: Theme.of(context).colorScheme.primary),
+                  TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
                 ),
                 GestureDetector(
                   onTap: onTap,
@@ -107,7 +107,7 @@ class registerPage extends StatelessWidget {
                     '  Login Now',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary),
+                        color: Theme.of(context).colorScheme.inversePrimary),
                   ),
                 ),
               ],

@@ -1,7 +1,6 @@
 import 'package:chatonce/models/message.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,13 +13,13 @@ class ChatService {
         .collection('Users')
         .doc(currentUserID)
         .collection('contacts')
+        .where('status', isEqualTo: 'Accepted')
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        return doc.data();
-      }).toList();
+      return snapshot.docs.map((doc) => doc.data()).toList();
     });
   }
+
 
   Future<void> sendMessage(String recieverID, message) async {
     final String currentUserID = _auth.currentUser!.uid;
@@ -95,4 +94,88 @@ class ChatService {
 
     return null;
   }
+  Future<void> sendFriendRequest(String recipientEmail) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    // Fetch the recipient's user ID
+    final recipientDoc = await _firestore
+        .collection('Users')
+        .where('email', isEqualTo: recipientEmail)
+        .get();
+
+    if (recipientDoc.docs.isEmpty) {
+      throw Exception('User not found');
+    }
+
+    final recipientID = recipientDoc.docs.first.id;
+
+    // Add the friend request to the recipient's friendRequests subcollection
+    await _firestore
+        .collection('Users')
+        .doc(recipientID)
+        .collection('friendRequests')
+        .add({
+      'fromUserID': user.uid,
+      'fromUserEmail': user.email,
+      'status': 'Pending',
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<List<Map<String, dynamic>>> getFriendRequests() {
+    final String currentUserID = _auth.currentUser!.uid;
+
+    return _firestore
+        .collection('Users')
+        .doc(currentUserID)
+        .collection('friendRequests')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return {
+          ...doc.data(),
+          'requestID': doc.id, // Include the ID for updates
+        };
+      }).toList();
+    });
+  }
+  Future<void> acceptFriendRequest(String requestID, String fromUserID, String fromUserEmail) async {
+    final String currentUserID = _auth.currentUser!.uid;
+    final String currentUserEmail = _auth.currentUser!.email!;
+
+    // Update friend request to "Accepted"
+    await _firestore
+        .collection('Users')
+        .doc(currentUserID)
+        .collection('friendRequests')
+        .doc(requestID)
+        .update({'status': 'Accepted'});
+
+    // Add to current user's contacts
+    await _firestore
+        .collection('Users')
+        .doc(currentUserID)
+        .collection('contacts')
+        .doc(fromUserID)
+        .set({
+      'uid': fromUserID,
+      'email': fromUserEmail,
+      'status': 'Accepted',
+    });
+
+    // Add to sender's contacts
+    await _firestore
+        .collection('Users')
+        .doc(fromUserID)
+        .collection('contacts')
+        .doc(currentUserID)
+        .set({
+      'uid': currentUserID,
+      'email': currentUserEmail,
+      'status': 'Accepted',
+    });
+  }
+
+
 }

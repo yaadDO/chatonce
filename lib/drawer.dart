@@ -24,7 +24,7 @@ class myDrawer extends StatelessWidget {
               DrawerHeader(
                 child: Center(
                   child: Icon(Icons.message,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: Theme.of(context).colorScheme.inversePrimary,
                       size: 40,
                   ),
                 ),

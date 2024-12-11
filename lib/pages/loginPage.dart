@@ -38,14 +38,14 @@ class LoginPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.message,
+              Icons.message_outlined,
               size: 60,
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.inversePrimary,
             ),
             Text(
               'Welcome',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.inversePrimary,
                 fontSize: 16,
               ),
             ),
@@ -79,7 +79,7 @@ class LoginPage extends StatelessWidget {
                 Text(
                   'Not a member?',
                   style:
-                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                      TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
                 ),
                 GestureDetector(
                   onTap: onTap,
@@ -87,7 +87,7 @@ class LoginPage extends StatelessWidget {
                     '  Register',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary),
+                        color: Theme.of(context).colorScheme.inversePrimary),
                   ),
                 ),
               ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../auth/authService.dart';
 import '../drawer.dart';
 import 'chatPage.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -15,12 +16,21 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: Text('Home'),
-        backgroundColor: Colors.transparent,
+        automaticallyImplyLeading: false,
+        title: Text(
+          ' Molo',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.tertiary,
+            fontSize: 40,
+            fontFamily: 'outofafrica',
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.grey,
         elevation: 0,
-        centerTitle: true,
+        //centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.person_add),
@@ -29,7 +39,13 @@ class HomePage extends StatelessWidget {
         ],
       ),
       drawer: const myDrawer(),
-      body: _buildUserList(),
+      body: Column(
+        children: [
+          // Friend requests list
+          Expanded(child: _buildUserList()),
+          Expanded(child: _buildFriendRequests()), // Contacts list
+        ],
+      ),
     );
   }
 
@@ -46,7 +62,9 @@ class HomePage extends StatelessWidget {
         }
 
         if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Text('No contacts found. Add some contacts to start chatting!');
+          return const Text(
+            'No contacts found. Add some contacts to start chatting!',
+          );
         }
 
         return ListView(
@@ -57,7 +75,6 @@ class HomePage extends StatelessWidget {
       },
     );
   }
-
 
   Widget _buildUserListItem(
       Map<String, dynamic> userData, BuildContext context) {
@@ -76,10 +93,11 @@ class HomePage extends StatelessWidget {
           );
         },
       );
-    }else{
+    } else {
       return Container();
     }
   }
+
   void _addContact(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
 
@@ -87,10 +105,10 @@ class HomePage extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Add Contact'),
+          title: const Text('Add Contact'),
           content: TextField(
             controller: emailController,
-            decoration: InputDecoration(labelText: 'Enter email'),
+            decoration: const InputDecoration(labelText: 'Enter email'),
           ),
           actions: [
             TextButton(
@@ -98,16 +116,21 @@ class HomePage extends StatelessWidget {
                 final email = emailController.text.trim();
 
                 if (email.isNotEmpty) {
-                  // Fetch the user by email
-                  final userDoc = await _chatService.getUserByEmail(email);
-                  if (userDoc != null) {
-                    await _chatService.addContact(userDoc['uid'], email);
+                  try {
+                    await _chatService.sendFriendRequest(email);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Friend request sent')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
                   }
                 }
 
                 Navigator.pop(context);
               },
-              child: Text('Add'),
+              child: const Text('Send Request'),
             ),
           ],
         );
@@ -115,5 +138,63 @@ class HomePage extends StatelessWidget {
     );
   }
 
-}
+  Widget _buildFriendRequests() {
+    return StreamBuilder(
+      stream: _chatService.getFriendRequests(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Text('Error loading requests');
+        }
 
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        if (snapshot.data == null || snapshot.data!.isEmpty) {
+          return const Text('No friend requests');
+        }
+
+        List<Map<String, dynamic>> requests = snapshot.data!;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return ListView(
+              children: requests.map<Widget>((request) {
+                return ListTile(
+                  title: Text(request['fromUserEmail']),
+                  trailing: IconButton(
+                    icon: Icon(Icons.check, color: Colors.green),
+                    onPressed: () async {
+                      try {
+                        await _chatService.acceptFriendRequest(
+                          request['requestID'],
+                          request['fromUserID'],
+                          request['fromUserEmail'],
+                        );
+
+                        // Update the state to remove the accepted request
+                        setState(() {
+                          requests.remove(request);
+                        });
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Friend request accepted')),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: ${e.toString()}')),
+                        );
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        );
+      },
+    );
+  }
+
+
+}
