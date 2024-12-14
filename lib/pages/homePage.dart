@@ -1,11 +1,9 @@
 import 'package:chatonce/chat/chatServices.dart';
 import 'package:chatonce/templates/userTile.dart';
 import 'package:flutter/material.dart';
-
 import '../auth/authService.dart';
 import '../drawer.dart';
 import 'chatPage.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -18,9 +16,9 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        //automaticallyImplyLeading: false,
         title: Text(
-          ' Molo',
+          'Molo',
           style: TextStyle(
             color: Theme.of(context).colorScheme.tertiary,
             fontSize: 40,
@@ -30,7 +28,6 @@ class HomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.grey,
         elevation: 0,
-        //centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.person_add),
@@ -39,12 +36,17 @@ class HomePage extends StatelessWidget {
         ],
       ),
       drawer: const myDrawer(),
-      body: Column(
-        children: [
-          // Friend requests list
-          Expanded(child: _buildUserList()),
-          Expanded(child: _buildFriendRequests()), // Contacts list
-        ],
+      body: _buildUserList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => FriendRequestsPage()),
+          );
+        },
+        child: const Icon(Icons.maps_ugc_rounded),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        tooltip: 'Friend Requests',
       ),
     );
   }
@@ -137,64 +139,74 @@ class HomePage extends StatelessWidget {
       },
     );
   }
+}
 
-  Widget _buildFriendRequests() {
-    return StreamBuilder(
-      stream: _chatService.getFriendRequests(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Text('Error loading requests');
-        }
+class FriendRequestsPage extends StatelessWidget {
+  final ChatService _chatService = ChatService();
 
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
+  FriendRequestsPage({super.key});
 
-        if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Text('No friend requests');
-        }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Friend Requests'),
+      ),
+      body: StreamBuilder(
+        stream: _chatService.getFriendRequests(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Error loading requests');
+          }
 
-        List<Map<String, dynamic>> requests = snapshot.data!;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          }
 
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return ListView(
-              children: requests.map<Widget>((request) {
-                return ListTile(
-                  title: Text(request['fromUserEmail']),
-                  trailing: IconButton(
-                    icon: Icon(Icons.check, color: Colors.green),
-                    onPressed: () async {
-                      try {
-                        await _chatService.acceptFriendRequest(
-                          request['requestID'],
-                          request['fromUserID'],
-                          request['fromUserEmail'],
-                        );
+          if (snapshot.data == null || snapshot.data!.isEmpty) {
+            return const Text('No friend requests');
+          }
 
-                        // Update the state to remove the accepted request
-                        setState(() {
-                          requests.remove(request);
-                        });
+          List<Map<String, dynamic>> requests = snapshot.data!;
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Friend request accepted')),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Error: ${e.toString()}')),
-                        );
-                      }
-                    },
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        );
-      },
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return ListView(
+                children: requests.map<Widget>((request) {
+                  return ListTile(
+                    title: Text(request['fromUserEmail']),
+                    trailing: IconButton(
+                      icon: Icon(Icons.check, color: Colors.green),
+                      onPressed: () async {
+                        try {
+                          await _chatService.acceptFriendRequest(
+                            request['requestID'],
+                            request['fromUserID'],
+                            request['fromUserEmail'],
+                          );
+
+                          // Update the state to remove the accepted request
+                          setState(() {
+                            requests.remove(request);
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Friend request accepted')),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: ${e.toString()}')),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          );
+        },
+      ),
     );
   }
-
-
 }

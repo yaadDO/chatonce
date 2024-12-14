@@ -11,7 +11,6 @@ class myDrawer extends StatelessWidget {
     auth.SignOut();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -21,14 +20,17 @@ class myDrawer extends StatelessWidget {
         children: [
           Column(
             children: [
-              DrawerHeader(
-                child: Center(
-                  child: Icon(Icons.message,
-                      color: Theme.of(context).colorScheme.inversePrimary,
-                      size: 40,
-                  ),
+              const DrawerHeader(
+              child: Text(
+                'MOLO',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontFamily: 'outofafrica',
+                  fontSize: 75,
                 ),
               ),
+            ),
+
               Padding(
                 padding: const EdgeInsets.only(left: 25.0),
                 child: ListTile(
@@ -63,7 +65,6 @@ class myDrawer extends StatelessWidget {
               title: const Text('L O G O U T'),
               leading: const Icon(Icons.logout_sharp),
               onTap: logout,
-
             ),
           ),
         ],
