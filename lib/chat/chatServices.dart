@@ -20,7 +20,6 @@ class ChatService {
     });
   }
 
-
   Future<void> sendMessage(String recieverID, message) async {
     final String currentUserID = _auth.currentUser!.uid;
     final String currentUserEmail = _auth.currentUser!.email!;
@@ -71,7 +70,6 @@ class ChatService {
       'email': contactEmail,
     });
 
-    // Optionally, add the current user to the contact's contacts list
     await _firestore
         .collection('Users')
         .doc(contactID)
@@ -82,6 +80,7 @@ class ChatService {
       'email': _auth.currentUser!.email,
     });
   }
+
   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
     final snapshot = await _firestore
         .collection('Users')
@@ -94,6 +93,7 @@ class ChatService {
 
     return null;
   }
+
   Future<void> sendFriendRequest(String recipientEmail) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -140,6 +140,7 @@ class ChatService {
       }).toList();
     });
   }
+
   Future<void> acceptFriendRequest(String requestID, String fromUserID, String fromUserEmail) async {
     final String currentUserID = _auth.currentUser!.uid;
     final String currentUserEmail = _auth.currentUser!.email!;
