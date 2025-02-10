@@ -145,14 +145,14 @@ class _ChatPageState extends State<ChatPage> {
           ),
           Container(
             decoration: const BoxDecoration(
-              color: Colors.green,
+              color: Colors.deepPurple,
               shape: BoxShape.circle,
             ),
             margin: const EdgeInsets.only(right:25),
             child: IconButton(
               onPressed: sendMessage,
               icon: const Icon(
-                  Icons.arrow_upward,
+                  Icons.send_outlined,
                   color: Colors.white,
               ),
             ),

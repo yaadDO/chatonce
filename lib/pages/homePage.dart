@@ -28,14 +28,15 @@ class HomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Colors.grey,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: Icon(Icons.person_add),
+            icon: Icon(Icons.person_add, color: Theme.of(context).colorScheme.tertiary),
             onPressed: () => _addContact(context),
           ),
         ],
       ),
-      drawer: const myDrawer(),
+      drawer: myDrawer(),
       body: _buildUserList(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

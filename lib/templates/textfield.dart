@@ -30,7 +30,7 @@ class text1 extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
           ),
-          fillColor: Theme.of(context).colorScheme.secondary,
+          fillColor: Colors.white,
           filled: true,
           hintText: hintText,
           hintStyle: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),
